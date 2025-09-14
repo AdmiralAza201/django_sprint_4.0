@@ -6,7 +6,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -34,8 +34,8 @@ def posts_queryset():
 def index(request):
     """Главная страница / Лента записей"""
     qs = posts_queryset().filter(
+        Q(category__is_published=True) | Q(category__isnull=True),
         is_published=True,
-        category__is_published=True,
         pub_date__lte=timezone.now(),
     )
     paginator = Paginator(qs, POSTS_PER_PAGE)
@@ -71,6 +71,8 @@ def category_posts(request, category_slug):
         category=category,
         is_published=True,
         pub_date__lte=timezone.now(),
+    ).filter(
+        Q(category__is_published=True) | Q(category__isnull=True)
     )
     paginator = Paginator(qs, POSTS_PER_PAGE)
     page_obj = paginator.get_page(request.GET.get('page'))
@@ -82,8 +84,8 @@ def _profile_posts(viewer, profile_user):
     qs = posts_queryset().filter(author=profile_user)
     if viewer != profile_user:
         qs = qs.filter(
+            Q(category__is_published=True) | Q(category__isnull=True),
             is_published=True,
-            category__is_published=True,
             pub_date__lte=timezone.now(),
         )
     return qs
