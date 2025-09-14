@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from django.http import HttpResponseForbidden
 
 
 def page_not_found(request, exception):
