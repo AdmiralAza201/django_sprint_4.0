@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-
+# Кастомные обработчики ошибок, чтобы посетители видели дружелюбные страницы
 def page_not_found(request, exception):
     return render(request, 'pages/404.html', status=404)
 
@@ -14,6 +14,7 @@ def permission_denied(request, exception):
 
 
 def csrf_failure(request, reason=''):
+    # Передаём причину сбоя в шаблон, чтобы было легче отладить
     context = {'reason': reason}
     response = render(request, 'pages/403csrf.html', context=context)
     response.status_code = 403
