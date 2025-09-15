@@ -75,3 +75,37 @@ python manage.py loaddata ../db.json
 - `/` — лента с картинками и счётчиками комментариев;
 - `/category/<slug>/` — список публикаций выбранной категории;
 - `/profile/<username>/` — профиль пользователя с его публикациями.
+diff --git a/README.md b/README.md
+index 5e5db5c0fe6750008c58ac1565ad100e415d720f..6840d8f13d39c4fdb199efccdc19fc5c32925514 100644
+--- a/README.md
++++ b/README.md
+@@ -53,25 +53,29 @@
+ - Медиа: загружаемые файлы в `media/` (исключена из Git).
+ 
+ ## Переменные настроек (важное)
+ 
+ - `MEDIA_URL` и `MEDIA_ROOT` — для пользовательских файлов.
+ - `EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'`
+ - `EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'`
+ - `LOGIN_URL = '/auth/login/'`
+ - `LOGIN_REDIRECT_URL = '/'`, `LOGOUT_REDIRECT_URL = '/'`
+ - `CSRF_FAILURE_VIEW = 'pages.views.csrf_failure'`
+ 
+ ## Загрузка демо-данных
+ 
+ В корне репозитория находится файл `db.json` с постами, категориями,
+ локациями и пользователями. Для загрузки выполните:
+ 
+ ```
+ cd blogicum
+ python manage.py loaddata ../db.json
+ ```
+ 
+ После загрузки откройте в браузере:
+ - `/` — лента с картинками и счётчиками комментариев;
+ - `/category/<slug>/` — список публикаций выбранной категории;
+ - `/profile/<username>/` — профиль пользователя с его публикациями.
++
++## Автор
++
++Кичиков Алексей Михайлович — <kichikovaleksey@gmail.com>
