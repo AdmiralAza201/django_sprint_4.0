@@ -22,6 +22,9 @@ POSTS_PER_PAGE = 10
 
 def posts_queryset():
     """Получение постов из БД"""
+    # select_related берёт связанные объекты за один запрос,
+    # чтобы шаблонам не приходилось ходить в базу каждый раз
+    # annotate добавляет количество комментариев к каждому посту
     return Post.objects.select_related(
         'category',
         'location',
@@ -33,6 +36,7 @@ def posts_queryset():
 
 def index(request):
     """Главная страница / Лента записей"""
+    # Публикуем только доступные записи: опубликованные и без будущей даты
     qs = posts_queryset().filter(
         Q(category__is_published=True) | Q(category__isnull=True),
         is_published=True,
@@ -47,11 +51,13 @@ def index(request):
 def post_detail(request, id):
     """Отображение полного описания выбранной записи."""
     post = get_object_or_404(posts_queryset(), id=id)
+    # Проверяем, можно ли показывать пост обычному пользователю
     is_public = (
         post.is_published and
         (post.category is None or post.category.is_published) and
         post.pub_date <= timezone.now()
     )
+    # Автор всегда видит свою запись, даже скрытую
     is_author = request.user.is_authenticated and request.user == post.author
     if not (is_public or is_author):
         raise Http404
@@ -82,6 +88,7 @@ def category_posts(request, category_slug):
 
 def _profile_posts(viewer, profile_user):
     qs = posts_queryset().filter(author=profile_user)
+    # Если чужой профиль — показываем только опубликованные записи
     if viewer != profile_user:
         qs = qs.filter(
             Q(category__is_published=True) | Q(category__isnull=True),
@@ -153,6 +160,7 @@ def comment_add(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     form = CommentForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
+        # save(commit=False) — чтобы заполнить автора и пост вручную
         comment = form.save(commit=False)
         comment.author = request.user
         comment.post = post
