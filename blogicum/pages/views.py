@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-# Кастомные обработчики ошибок, чтобы посетители видели дружелюбные страницы
+# Кастомные обработчики ошибок
 def page_not_found(request, exception):
     return render(request, 'pages/404.html', status=404)
 
