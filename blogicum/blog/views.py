@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login, authenticate
 from django.contrib.auth.forms import UserCreationForm
@@ -53,9 +51,9 @@ def post_detail(request, id):
     post = get_object_or_404(posts_queryset(), id=id)
     # Проверяем, можно ли показывать пост обычному пользователю
     is_public = (
-        post.is_published and
-        (post.category is None or post.category.is_published) and
-        post.pub_date <= timezone.now()
+        post.is_published
+        and (post.category is None or post.category.is_published)
+        and post.pub_date <= timezone.now()
     )
     # Автор всегда видит свою запись, даже скрытую
     is_author = request.user.is_authenticated and request.user == post.author
@@ -63,7 +61,8 @@ def post_detail(request, id):
         raise Http404
     comments = post.comments.select_related('author').all()
     form = CommentForm()
-    return render(request, 'blog/detail.html', {'post': post, 'comments': comments, 'form': form})
+    context = {'post': post, 'comments': comments, 'form': form}
+    return render(request, 'blog/detail.html', context)
 
 
 def category_posts(request, category_slug):
@@ -100,10 +99,12 @@ def _profile_posts(viewer, profile_user):
 
 def profile(request, username):
     user = get_object_or_404(User, username=username)
-    qs = _profile_posts(request.user if request.user.is_authenticated else None, user)
+    viewer = request.user if request.user.is_authenticated else None
+    qs = _profile_posts(viewer, user)
     paginator = Paginator(qs, POSTS_PER_PAGE)
     page_obj = paginator.get_page(request.GET.get('page'))
-    return render(request, 'blog/profile.html', {'profile': user, 'page_obj': page_obj})
+    context = {'profile': user, 'page_obj': page_obj}
+    return render(request, 'blog/profile.html', context)
 
 
 @login_required
@@ -134,12 +135,17 @@ def post_edit(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     if request.user != post.author:
         return redirect('blog:post_detail', id=post.id)
-    form = PostForm(request.POST or None, files=request.FILES or None, instance=post)
+    form = PostForm(
+        request.POST or None,
+        files=request.FILES or None,
+        instance=post,
+    )
     if request.method == 'POST' and form.is_valid():
         form.save()
         messages.success(request, 'Публикация обновлена')
         return redirect('blog:post_detail', id=post.id)
-    return render(request, 'blog/create.html', {'form': form, 'post': post})
+    context = {'form': form, 'post': post}
+    return render(request, 'blog/create.html', context)
 
 
 @login_required
@@ -180,7 +186,8 @@ def comment_edit(request, post_id, comment_id):
         form.save()
         messages.success(request, 'Комментарий обновлён')
         return redirect('blog:post_detail', id=post.id)
-    return render(request, 'blog/comment.html', {'form': form, 'comment': comment})
+    context = {'form': form, 'comment': comment}
+    return render(request, 'blog/comment.html', context)
 
 
 @login_required
@@ -208,4 +215,8 @@ def register(request):
             login(request, user)
             return redirect('blog:profile', username=user.username)
         return redirect('login')
-    return render(request, 'registration/registration_form.html', {'form': form})
+    return render(
+        request,
+        'registration/registration_form.html',
+        {'form': form},
+    )
