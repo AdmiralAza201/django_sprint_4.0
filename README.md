@@ -13,8 +13,8 @@
   - `pip install -r requirements.txt`
 - Примените миграции:
   - `cd blogicum && python manage.py migrate`
-- (Опционально) Загрузите демонстрационные данные:
-  - `python manage.py loaddata ../db.json`
+- Загрузите демонстрационные данные:
+  - `python manage.py loaddata db.json`
 - Запустите сервер разработки:
   - `python manage.py runserver`
 
