@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.utils import timezone
 
 User = get_user_model()
 TEXT_LENGTH = 256
@@ -34,6 +35,9 @@ class Category(BaseModel):
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
 
+    def __str__(self):
+        return self.title
+
 
 class Location(BaseModel):
     name = models.CharField(max_length=TEXT_LENGTH,
@@ -43,6 +47,9 @@ class Location(BaseModel):
         verbose_name = 'местоположение'
         verbose_name_plural = 'Местоположения'
 
+    def __str__(self):
+        return self.name
+
 
 class Post(BaseModel):
     title = models.CharField(max_length=TEXT_LENGTH, verbose_name='Заголовок')
@@ -50,7 +57,8 @@ class Post(BaseModel):
     pub_date = models.DateTimeField(
         verbose_name='Дата и время публикации',
         help_text='Если установить дату и время в будущем — '
-                  'можно делать отложенные публикации.'
+                  'можно делать отложенные публикации.',
+        default=timezone.now
     )
     author = models.ForeignKey(
         User,
@@ -82,6 +90,9 @@ class Post(BaseModel):
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
         ordering = ['-pub_date']
+
+    def __str__(self):
+        return self.title
 
 
 class Comment(models.Model):
